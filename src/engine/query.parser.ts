@@ -15,9 +15,9 @@ export class QueryParser {
   normalize(text: string): string {
     return text
       .toLowerCase()
-      .trim()
       .replace(/[^\w\s]/g, ' ')
-      .replace(/\s+/g, ' ');
+      .replace(/\s+/g, ' ')
+      .trim();
   }
 
   tokenize(text: string): string[] {

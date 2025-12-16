@@ -1,3 +1,4 @@
+import 'reflect-metadata';
 import { DecoratorIndexer, getIndexableMetadata, getSearchableMetadata } from '../../src/indexers/decorator.indexer';
 import { Indexable } from '../../src/decorators/indexable.decorator';
 import { Searchable } from '../../src/decorators/searchable.decorator';
@@ -34,11 +35,11 @@ describe('DecoratorIndexer', () => {
   });
 
   it('should get searchable metadata', () => {
-    const nameMetadata = getSearchableMetadata(TestEntity.prototype.constructor, 'name');
+    const nameMetadata = getSearchableMetadata(TestEntity.prototype, 'name');
     expect(nameMetadata).toBeDefined();
     expect(nameMetadata?.weight).toBe(2.0);
 
-    const categoryMetadata = getSearchableMetadata(TestEntity.prototype.constructor, 'category');
+    const categoryMetadata = getSearchableMetadata(TestEntity.prototype, 'category');
     expect(categoryMetadata).toBeDefined();
     expect(categoryMetadata?.facet).toBe(true);
   });

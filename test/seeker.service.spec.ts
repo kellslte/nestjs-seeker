@@ -34,9 +34,21 @@ describe('SeekerService', () => {
           useValue: indexManager,
         },
         IndexService,
-        SearchService,
+        {
+          provide: SearchService,
+          useFactory: (indexManager: IndexManager) => {
+            return new SearchService(indexManager, 2);
+          },
+          inject: [IndexManager],
+        },
         FacetService,
-        SuggestionService,
+        {
+          provide: SuggestionService,
+          useFactory: (indexManager: IndexManager) => {
+            return new SuggestionService(indexManager, 2);
+          },
+          inject: [IndexManager],
+        },
         SeekerService,
       ],
     }).compile();

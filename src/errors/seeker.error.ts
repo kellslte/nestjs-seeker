@@ -27,11 +27,13 @@ export class DocumentNotFoundError extends SeekerError {
 }
 
 export class StorageError extends SeekerError {
+  public readonly cause?: Error;
+
   constructor(message: string, cause?: Error) {
     super(message, 'STORAGE_ERROR', 500);
     this.name = 'StorageError';
     if (cause) {
-      this.cause = cause;
+      (this as any).cause = cause;
     }
     Object.setPrototypeOf(this, StorageError.prototype);
   }

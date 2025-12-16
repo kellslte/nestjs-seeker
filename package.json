@@ -7,6 +7,9 @@
   "files": [
     "dist"
   ],
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "build": "tsc",
     "test": "jest",
@@ -21,6 +24,7 @@
     "version:major": "npm version major --no-git-tag-version && npm run changelog:update",
     "version:auto": "node scripts/version-bump.js",
     "changelog:update": "node scripts/update-changelog.js",
+    "prepare": "node scripts/setup-hooks.js || true",
     "changelog:generate": "conventional-changelog -p angular -i CHANGELOG.md -s",
     "release:patch": "npm run version:patch && npm run build && npm run test && git add . && git commit -m \"chore: bump version to $(node -p \"require('./package.json').version\")\" && git tag \"v$(node -p \"require('./package.json').version\")\"",
     "release:minor": "npm run version:minor && npm run build && npm run test && git add . && git commit -m \"chore: bump version to $(node -p \"require('./package.json').version\")\" && git tag \"v$(node -p \"require('./package.json').version\")\"",
@@ -71,6 +75,7 @@
     "@types/node": "^20.0.0",
     "@types/pako": "^2.0.0",
     "@typescript-eslint/eslint-plugin": "^6.0.0",
+    "reflect-metadata": "^0.1.13",
     "@typescript-eslint/parser": "^6.0.0",
     "conventional-changelog-cli": "^4.1.0",
     "eslint": "^8.0.0",
@@ -89,6 +94,7 @@
     ],
     "rootDir": ".",
     "testRegex": ".*\\.spec\\.ts$",
+    "setupFilesAfterEnv": ["<rootDir>/test/setup.ts"],
     "transform": {
       "^.+\\.(t|j)s$": [
         "ts-jest",
@@ -108,4 +114,3 @@
     ]
   }
 }
-

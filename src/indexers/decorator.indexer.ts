@@ -47,6 +47,7 @@ export class DecoratorIndexer implements Indexer {
   getFieldConfig(entity: any): Record<string, FieldConfig> {
     const config: Record<string, FieldConfig> = {};
     const prototype = Object.getPrototypeOf(entity);
+    const constructor = prototype.constructor;
     
     // Get all property keys from the entity
     const propertyKeys = [
@@ -59,7 +60,12 @@ export class DecoratorIndexer implements Indexer {
         return;
       }
 
-      const metadata = getSearchableMetadata(prototype.constructor, key);
+      // Try both prototype and constructor
+      let metadata = getSearchableMetadata(prototype, key);
+      if (!metadata) {
+        metadata = getSearchableMetadata(constructor, key);
+      }
+      
       if (metadata) {
         config[key] = {
           weight: metadata.weight,
