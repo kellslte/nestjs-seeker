@@ -43,4 +43,3 @@ describe('FuzzyMatcher', () => {
     expect(matcher.calculateSimilarity('hello', 'world')).toBeLessThan(0.5);
   });
 });
-

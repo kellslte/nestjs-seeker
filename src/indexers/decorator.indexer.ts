@@ -24,36 +24,41 @@ export function getSearchableMetadata(target: any, propertyKey: string): Searcha
 }
 
 export class DecoratorIndexer implements Indexer {
-  async index(indexName: string, document: Document): Promise<void> {
+  async index(_indexName: string, _document: Document): Promise<void> {
     // This is a placeholder - actual indexing is handled by IndexService
-    throw new Error('DecoratorIndexer.index should not be called directly. Use IndexService instead.');
+    throw new Error(
+      'DecoratorIndexer.index should not be called directly. Use IndexService instead.',
+    );
   }
 
-  async indexBatch(indexName: string, documents: Document[]): Promise<void> {
+  async indexBatch(_indexName: string, _documents: Document[]): Promise<void> {
     // This is a placeholder - actual indexing is handled by IndexService
-    throw new Error('DecoratorIndexer.indexBatch should not be called directly. Use IndexService instead.');
+    throw new Error(
+      'DecoratorIndexer.indexBatch should not be called directly. Use IndexService instead.',
+    );
   }
 
-  async remove(indexName: string, documentId: string): Promise<void> {
+  async remove(_indexName: string, _documentId: string): Promise<void> {
     // This is a placeholder - actual removal is handled by IndexService
-    throw new Error('DecoratorIndexer.remove should not be called directly. Use IndexService instead.');
+    throw new Error(
+      'DecoratorIndexer.remove should not be called directly. Use IndexService instead.',
+    );
   }
 
-  async update(indexName: string, document: Document): Promise<void> {
+  async update(_indexName: string, _document: Document): Promise<void> {
     // This is a placeholder - actual update is handled by IndexService
-    throw new Error('DecoratorIndexer.update should not be called directly. Use IndexService instead.');
+    throw new Error(
+      'DecoratorIndexer.update should not be called directly. Use IndexService instead.',
+    );
   }
 
   getFieldConfig(entity: any): Record<string, FieldConfig> {
     const config: Record<string, FieldConfig> = {};
     const prototype = Object.getPrototypeOf(entity);
     const constructor = prototype.constructor;
-    
+
     // Get all property keys from the entity
-    const propertyKeys = [
-      ...Object.keys(entity),
-      ...Object.getOwnPropertyNames(prototype),
-    ];
+    const propertyKeys = [...Object.keys(entity), ...Object.getOwnPropertyNames(prototype)];
 
     propertyKeys.forEach((key) => {
       if (key === 'constructor') {
@@ -65,7 +70,7 @@ export class DecoratorIndexer implements Indexer {
       if (!metadata) {
         metadata = getSearchableMetadata(constructor, key);
       }
-      
+
       if (metadata) {
         config[key] = {
           weight: metadata.weight,
@@ -79,4 +84,3 @@ export class DecoratorIndexer implements Indexer {
     return config;
   }
 }
-

@@ -20,4 +20,3 @@ export interface StorageOptions {
   compression?: boolean;
   compressionType?: 'gzip' | 'brotli';
 }
-

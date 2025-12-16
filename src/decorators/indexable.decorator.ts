@@ -10,4 +10,3 @@ export function Indexable(indexName: string) {
     Reflect.defineMetadata(INDEXABLE_METADATA_KEY, metadata, target);
   };
 }
-

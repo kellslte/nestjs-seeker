@@ -34,7 +34,7 @@ export abstract class BaseStorageAdapter implements StorageAdapter {
   protected deserialize(json: string): IndexData {
     const parsed = JSON.parse(json);
     const documents = new Map<string, any>(parsed.documents);
-    
+
     // Convert date strings back to Date objects
     documents.forEach((doc) => {
       doc.createdAt = new Date(doc.createdAt);
@@ -52,4 +52,3 @@ export abstract class BaseStorageAdapter implements StorageAdapter {
     };
   }
 }
-

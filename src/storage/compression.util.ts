@@ -4,7 +4,7 @@ import { CompressionType } from '../types';
 export class CompressionUtil {
   static compress(data: string, type: CompressionType = 'gzip', level: number = 6): Buffer {
     const input = Buffer.from(data, 'utf-8');
-    
+
     if (type === 'gzip') {
       const compressed = pako.gzip(input, { level });
       return Buffer.from(compressed);
@@ -14,7 +14,7 @@ export class CompressionUtil {
       const compressed = pako.gzip(input, { level });
       return Buffer.from(compressed);
     }
-    
+
     throw new Error(`Unsupported compression type: ${type}`);
   }
 
@@ -24,7 +24,7 @@ export class CompressionUtil {
       const decompressed = pako.ungzip(data);
       return Buffer.from(decompressed).toString('utf-8');
     }
-    
+
     throw new Error(`Unsupported compression type: ${type}`);
   }
 
@@ -33,4 +33,3 @@ export class CompressionUtil {
     return data.length >= 2 && data[0] === 0x1f && data[1] === 0x8b;
   }
 }
-

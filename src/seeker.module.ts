@@ -14,11 +14,7 @@ import { S3Adapter } from './storage/s3.adapter';
 import { GCSAdapter } from './storage/gcs.adapter';
 import { AzureBlobAdapter } from './storage/azure-blob.adapter';
 import { RedisAdapter } from './storage/redis.adapter';
-import {
-  DEFAULT_STORAGE_TYPE,
-  DEFAULT_ANALYZER,
-  DEFAULT_FUZZY_THRESHOLD,
-} from './constants';
+import { DEFAULT_STORAGE_TYPE, DEFAULT_ANALYZER, DEFAULT_FUZZY_THRESHOLD } from './constants';
 
 @Module({})
 export class SeekerModule {
@@ -144,4 +140,3 @@ export class SeekerModule {
     }
   }
 }
-

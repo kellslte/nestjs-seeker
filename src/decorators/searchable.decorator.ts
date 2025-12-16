@@ -20,4 +20,3 @@ export function Searchable(options: SearchableOptions = {}) {
     Reflect.defineMetadata(SEARCHABLE_METADATA_KEY, metadata, target, propertyKey);
   };
 }
-

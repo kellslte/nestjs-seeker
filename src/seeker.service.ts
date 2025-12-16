@@ -40,4 +40,3 @@ export class SeekerService {
     return !!(this.options.storage && this.options.storage.type);
   }
 }
-

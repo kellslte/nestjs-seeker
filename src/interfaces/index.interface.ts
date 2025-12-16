@@ -13,4 +13,3 @@ export interface IndexInfo {
   createdAt: Date;
   updatedAt: Date;
 }
-

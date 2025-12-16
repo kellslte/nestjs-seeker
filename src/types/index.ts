@@ -40,4 +40,3 @@ export interface IndexData {
   invertedIndex: InvertedIndex;
   metadata: IndexMetadata;
 }
-

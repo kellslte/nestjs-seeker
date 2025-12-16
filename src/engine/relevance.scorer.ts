@@ -37,23 +37,21 @@ export class RelevanceScorer {
       return 0;
     }
 
-    const idf = Math.log((totalDocuments - documentFrequency + 0.5) / (documentFrequency + 0.5) + 1);
+    const idf = Math.log(
+      (totalDocuments - documentFrequency + 0.5) / (documentFrequency + 0.5) + 1,
+    );
     const fieldWeight = fieldConfig[field]?.weight || 1.0;
     const normalizedLength = fieldLength / avgFieldLength;
-    
+
     const score =
-      idf *
-      (termFrequency * (this.k1 + 1)) /
-      (termFrequency + this.k1 * (1 - this.b + this.b * normalizedLength)) *
+      ((idf * (termFrequency * (this.k1 + 1))) /
+        (termFrequency + this.k1 * (1 - this.b + this.b * normalizedLength))) *
       fieldWeight;
 
     return score;
   }
 
-  calculateAvgFieldLength(
-    documents: Map<string, Document>,
-    field: string,
-  ): number {
+  calculateAvgFieldLength(documents: Map<string, Document>, field: string): number {
     if (documents.size === 0) {
       return 1;
     }
@@ -81,7 +79,7 @@ export class RelevanceScorer {
 
     fields.forEach((field) => {
       const avgLength = this.calculateAvgFieldLength(documents, field);
-      
+
       queryTerms.forEach((term) => {
         const score = this.calculateBM25(
           term,
@@ -99,4 +97,3 @@ export class RelevanceScorer {
     return totalScore;
   }
 }
-

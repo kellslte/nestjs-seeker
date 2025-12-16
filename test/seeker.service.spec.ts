@@ -86,4 +86,3 @@ describe('SeekerService', () => {
     expect(service.isConfigured()).toBe(true);
   });
 });
-

@@ -6,11 +6,7 @@ import { QueryParser } from '../engine/query.parser';
 import { RelevanceScorer } from '../engine/relevance.scorer';
 import { FuzzyMatcher } from '../engine/fuzzy.matcher';
 import { FacetProcessor } from '../engine/facet.processor';
-import {
-  DEFAULT_FUZZY_THRESHOLD,
-  DEFAULT_MAX_RESULTS,
-  DEFAULT_MIN_SCORE,
-} from '../constants';
+import { DEFAULT_FUZZY_THRESHOLD, DEFAULT_MAX_RESULTS, DEFAULT_MIN_SCORE } from '../constants';
 
 @Injectable()
 export class SearchService {
@@ -33,7 +29,7 @@ export class SearchService {
 
   async search(query: SearchQuery): Promise<SearchResponse> {
     const startTime = Date.now();
-    
+
     // Load index
     const indexData = await this.indexManager.loadIndex(query.indexName);
     if (!indexData) {
@@ -53,19 +49,16 @@ export class SearchService {
 
     // Get searchable fields
     const searchFields = query.fields || this.getSearchableFields(indexData);
-    
+
     // Apply facet filters if provided
     let candidateIds = Array.from(indexData.documents.keys());
     if (query.filters) {
-      candidateIds = this.facetProcessor.filterByFacets(
-        indexData.documents,
-        query.filters,
-      );
+      candidateIds = this.facetProcessor.filterByFacets(indexData.documents, query.filters);
     }
 
     // Score documents
     const scoredDocuments: Array<{ documentId: string; score: number }> = [];
-    
+
     candidateIds.forEach((documentId) => {
       let score = 0;
 
@@ -178,4 +171,3 @@ export class SearchService {
     return highlights;
   }
 }
-

@@ -82,7 +82,7 @@ describe('InMemoryAdapter', () => {
 
     await adapter.write(indexName, indexData);
     expect(await adapter.exists(indexName)).toBe(true);
-    
+
     await adapter.delete(indexName);
     expect(await adapter.exists(indexName)).toBe(false);
   });
@@ -113,4 +113,3 @@ describe('InMemoryAdapter', () => {
     expect(list).toContain(indexName2);
   });
 });
-

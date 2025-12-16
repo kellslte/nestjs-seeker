@@ -7,4 +7,3 @@ export const DEFAULT_MAX_RESULTS = 100;
 export const DEFAULT_MIN_SCORE = 0.0;
 export const DEFAULT_ANALYZER = 'standard';
 export const DEFAULT_COMPRESSION_LEVEL = 6;
-

@@ -10,6 +10,7 @@ let DeleteObjectCommand: any;
 let ListObjectsV2Command: any;
 
 try {
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
   const s3Module = require('@aws-sdk/client-s3');
   S3Client = s3Module.S3Client;
   PutObjectCommand = s3Module.PutObjectCommand;
@@ -26,7 +27,7 @@ export class S3Adapter extends CloudAdapter {
 
   constructor(options: StorageOptions = {}) {
     super(options);
-    
+
     if (!S3Client) {
       throw new StorageError(
         '@aws-sdk/client-s3 is not installed. Install it as an optional dependency.',
@@ -53,11 +54,11 @@ export class S3Adapter extends CloudAdapter {
 
       const response = await this.client.send(command);
       const chunks: Buffer[] = [];
-      
+
       for await (const chunk of response.Body) {
         chunks.push(chunk);
       }
-      
+
       const buffer = Buffer.concat(chunks);
       const json = await this.decompressData(buffer);
       return this.deserialize(json);
@@ -130,4 +131,3 @@ export class S3Adapter extends CloudAdapter {
     }
   }
 }
-

@@ -17,11 +17,7 @@ export class IndexService {
   }
 
   async createIndex(options: IndexOptions): Promise<void> {
-    await this.indexManager.createIndex(
-      options.name,
-      options.fieldConfig || {},
-      options.analyzer,
-    );
+    await this.indexManager.createIndex(options.name, options.fieldConfig || {}, options.analyzer);
   }
 
   async deleteIndex(indexName: string): Promise<void> {
@@ -38,11 +34,7 @@ export class IndexService {
     await this.indexManager.addDocument(indexName, document, fieldConfig);
   }
 
-  async indexBatch(
-    indexName: string,
-    documents: Document[],
-    entities?: any[],
-  ): Promise<void> {
+  async indexBatch(indexName: string, documents: Document[], entities?: any[]): Promise<void> {
     for (let i = 0; i < documents.length; i++) {
       const entity = entities?.[i];
       await this.index(indexName, documents[i], entity);
@@ -81,4 +73,3 @@ export class IndexService {
     return await this.indexManager['storage'].list();
   }
 }
-

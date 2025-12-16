@@ -6,6 +6,7 @@ import { StorageError } from '../errors/seeker.error';
 let Storage: any;
 
 try {
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
   Storage = require('@google-cloud/storage').Storage;
 } catch (error) {
   // GCS SDK not installed
@@ -17,7 +18,7 @@ export class GCSAdapter extends CloudAdapter {
 
   constructor(options: StorageOptions = {}) {
     super(options);
-    
+
     if (!Storage) {
       throw new StorageError(
         '@google-cloud/storage is not installed. Install it as an optional dependency.',
@@ -36,7 +37,7 @@ export class GCSAdapter extends CloudAdapter {
     try {
       const file = this.bucket.file(this.getKey(indexName));
       const [exists] = await file.exists();
-      
+
       if (!exists) {
         return null;
       }
@@ -53,7 +54,7 @@ export class GCSAdapter extends CloudAdapter {
     try {
       const json = this.serialize(data);
       const buffer = await this.compressData(json);
-      
+
       const file = this.bucket.file(this.getKey(indexName));
       await file.save(buffer, {
         contentType: 'application/octet-stream',
@@ -96,4 +97,3 @@ export class GCSAdapter extends CloudAdapter {
     }
   }
 }
-

@@ -15,7 +15,12 @@ export * from './interfaces';
 export * from './types';
 
 // Error exports
-export { SeekerError, IndexNotFoundError, DocumentNotFoundError, StorageError } from './errors/seeker.error';
+export {
+  SeekerError,
+  IndexNotFoundError,
+  DocumentNotFoundError,
+  StorageError,
+} from './errors/seeker.error';
 
 // Decorator exports
 export { Indexable } from './decorators/indexable.decorator';
@@ -31,4 +36,3 @@ export { AzureBlobAdapter } from './storage/azure-blob.adapter';
 export { RedisAdapter } from './storage/redis.adapter';
 export { BaseStorageAdapter } from './storage/storage.adapter';
 export type { StorageAdapter, StorageOptions } from './interfaces/storage.interface';
-

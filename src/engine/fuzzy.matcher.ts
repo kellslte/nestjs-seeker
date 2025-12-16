@@ -42,12 +42,11 @@ export class FuzzyMatcher {
 
     const distance = this.levenshteinDistance(term, query);
     const maxLength = Math.max(term.length, query.length);
-    
+
     if (maxLength === 0) {
       return true;
     }
 
-    const similarity = 1 - distance / maxLength;
     return distance <= this.threshold;
   }
 
@@ -59,7 +58,7 @@ export class FuzzyMatcher {
   calculateSimilarity(str1: string, str2: string): number {
     const distance = this.levenshteinDistance(str1, str2);
     const maxLength = Math.max(str1.length, str2.length);
-    
+
     if (maxLength === 0) {
       return 1;
     }
@@ -67,4 +66,3 @@ export class FuzzyMatcher {
     return 1 - distance / maxLength;
   }
 }
-

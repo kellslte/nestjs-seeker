@@ -21,7 +21,7 @@ export class RedisAdapter extends CloudAdapter {
 
   constructor(options: StorageOptions = {}) {
     super(options);
-    
+
     if (!Redis) {
       throw new StorageError(
         'ioredis or redis is not installed. Install it as an optional dependency.',
@@ -29,7 +29,7 @@ export class RedisAdapter extends CloudAdapter {
     }
 
     this.keyPrefix = 'seeker:index:';
-    
+
     if (options.connectionString) {
       this.client = new Redis(options.connectionString);
     } else {
@@ -48,7 +48,7 @@ export class RedisAdapter extends CloudAdapter {
     try {
       const key = this.getRedisKey(indexName);
       const data = await this.client.get(key);
-      
+
       if (!data) {
         return null;
       }
@@ -66,7 +66,7 @@ export class RedisAdapter extends CloudAdapter {
       const json = this.serialize(data);
       const buffer = await this.compressData(json);
       const key = this.getRedisKey(indexName);
-      
+
       await this.client.set(key, buffer.toString('base64'));
     } catch (error) {
       throw new StorageError(`Failed to write index to Redis: ${indexName}`, error as Error);
@@ -101,4 +101,3 @@ export class RedisAdapter extends CloudAdapter {
     }
   }
 }
-

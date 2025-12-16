@@ -39,4 +39,3 @@ export class InMemoryAdapter extends BaseStorageAdapter {
     this.storage.clear();
   }
 }
-

@@ -1,6 +1,5 @@
 import { BaseStorageAdapter } from './storage.adapter';
 import { StorageOptions } from '../interfaces/storage.interface';
-import { IndexData } from '../types';
 import { CompressionUtil } from './compression.util';
 import { StorageError } from '../errors/seeker.error';
 
@@ -34,4 +33,3 @@ export abstract class CloudAdapter extends BaseStorageAdapter {
     return `indexes/${indexName}.seeker`;
   }
 }
-

@@ -7,4 +7,3 @@ export interface Indexer {
   update(indexName: string, document: Document): Promise<void>;
   getFieldConfig(entity: any): Record<string, FieldConfig>;
 }
-

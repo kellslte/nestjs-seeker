@@ -31,7 +31,7 @@ export class SuggestionService {
 
     // Collect unique terms from documents
     const terms = new Set<string>();
-    
+
     indexData.documents.forEach((document) => {
       if (field) {
         const value = document.fields[field];
@@ -53,7 +53,7 @@ export class SuggestionService {
         const similarity = term.startsWith(queryLower)
           ? 1.0
           : this.fuzzyMatcher.calculateSimilarity(term, queryLower);
-        
+
         if (similarity > 0.3) {
           const currentScore = suggestions.get(term) || 0;
           suggestions.set(term, Math.max(currentScore, similarity));
@@ -71,4 +71,3 @@ export class SuggestionService {
     return results.slice(0, limit);
   }
 }
-

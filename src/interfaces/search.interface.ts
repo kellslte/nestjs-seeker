@@ -41,4 +41,3 @@ export interface SuggestionResult {
   text: string;
   score: number;
 }
-

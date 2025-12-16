@@ -1,4 +1,4 @@
-import { Document, InvertedIndex } from '../types';
+import { Document } from '../types';
 import { FacetResult } from '../interfaces/search.interface';
 
 export class FacetProcessor {
@@ -11,7 +11,7 @@ export class FacetProcessor {
 
     facetFields.forEach((field) => {
       facets[field] = {};
-      
+
       documentIds.forEach((docId) => {
         const doc = documents.get(docId);
         if (!doc) {
@@ -29,10 +29,7 @@ export class FacetProcessor {
     return facets;
   }
 
-  filterByFacets(
-    documents: Map<string, Document>,
-    facetFilters: Record<string, any>,
-  ): string[] {
+  filterByFacets(documents: Map<string, Document>, facetFilters: Record<string, any>): string[] {
     const matchingIds: string[] = [];
 
     documents.forEach((doc, docId) => {
@@ -53,4 +50,3 @@ export class FacetProcessor {
     return matchingIds;
   }
 }
-

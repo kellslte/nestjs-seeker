@@ -11,4 +11,3 @@ export abstract class BaseService {
     return { ...this.options };
   }
 }
-

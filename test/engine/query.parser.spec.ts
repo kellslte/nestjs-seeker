@@ -42,4 +42,3 @@ describe('QueryParser', () => {
     expect(result).toEqual(['hello', 'world']);
   });
 });
-

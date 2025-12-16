@@ -26,10 +26,7 @@ export class FacetService {
     return this.facetProcessor.processFacets(indexData.documents, facetFields, ids);
   }
 
-  async filterByFacets(
-    indexName: string,
-    facetFilters: Record<string, any>,
-  ): Promise<string[]> {
+  async filterByFacets(indexName: string, facetFilters: Record<string, any>): Promise<string[]> {
     const indexData = await this.indexManager.loadIndex(indexName);
     if (!indexData) {
       throw new IndexNotFoundError(indexName);
@@ -38,4 +35,3 @@ export class FacetService {
     return this.facetProcessor.filterByFacets(indexData.documents, facetFilters);
   }
 }
-

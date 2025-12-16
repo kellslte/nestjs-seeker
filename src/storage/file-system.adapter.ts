@@ -31,14 +31,14 @@ export class FileSystemAdapter extends BaseStorageAdapter {
     try {
       const filePath = this.getIndexPath(indexName);
       const data = await fs.readFile(filePath);
-      
+
       let json: string;
       if (this.options.compression && CompressionUtil.isCompressed(data)) {
         json = CompressionUtil.decompress(data, this.options.compressionType);
       } else {
         json = data.toString('utf-8');
       }
-      
+
       return this.deserialize(json);
     } catch (error: any) {
       if (error.code === 'ENOENT') {
@@ -53,7 +53,7 @@ export class FileSystemAdapter extends BaseStorageAdapter {
       await this.ensureDirectory();
       const filePath = this.getIndexPath(indexName);
       const json = this.serialize(data);
-      
+
       let buffer: Buffer;
       if (this.options.compression) {
         buffer = CompressionUtil.compress(
@@ -64,7 +64,7 @@ export class FileSystemAdapter extends BaseStorageAdapter {
       } else {
         buffer = Buffer.from(json, 'utf-8');
       }
-      
+
       await fs.writeFile(filePath, buffer);
     } catch (error) {
       throw new StorageError(`Failed to write index: ${indexName}`, error as Error);
@@ -104,4 +104,3 @@ export class FileSystemAdapter extends BaseStorageAdapter {
     }
   }
 }
-

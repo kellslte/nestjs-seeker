@@ -1,5 +1,9 @@
 import 'reflect-metadata';
-import { DecoratorIndexer, getIndexableMetadata, getSearchableMetadata } from '../../src/indexers/decorator.indexer';
+import {
+  DecoratorIndexer,
+  getIndexableMetadata,
+  getSearchableMetadata,
+} from '../../src/indexers/decorator.indexer';
 import { Indexable } from '../../src/decorators/indexable.decorator';
 import { Searchable } from '../../src/decorators/searchable.decorator';
 
@@ -61,4 +65,3 @@ describe('DecoratorIndexer', () => {
     expect(config.normalField).toBeUndefined();
   });
 });
-

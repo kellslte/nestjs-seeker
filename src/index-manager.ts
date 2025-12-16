@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { StorageAdapter } from './interfaces/storage.interface';
-import { IndexData, IndexMetadata, Document, InvertedIndex, FieldConfig, AnalyzerType } from './types';
+import { IndexData, IndexMetadata, Document, FieldConfig, AnalyzerType } from './types';
 import { QueryParser } from './engine/query.parser';
 import { DEFAULT_ANALYZER } from './constants';
 
@@ -132,7 +132,7 @@ export class IndexManager {
     // Remove from inverted index
     Object.keys(indexData.invertedIndex).forEach((term) => {
       delete indexData.invertedIndex[term][documentId];
-      
+
       // Clean up empty terms
       if (Object.keys(indexData.invertedIndex[term]).length === 0) {
         delete indexData.invertedIndex[term];
@@ -160,4 +160,3 @@ export class IndexManager {
     await this.storage.delete(indexName);
   }
 }
-

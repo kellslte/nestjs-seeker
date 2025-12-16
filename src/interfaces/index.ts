@@ -12,4 +12,3 @@ export * from './storage.interface';
 
 // Indexer interfaces
 export * from './indexer.interface';
-

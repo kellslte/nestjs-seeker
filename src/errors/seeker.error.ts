@@ -38,4 +38,3 @@ export class StorageError extends SeekerError {
     Object.setPrototypeOf(this, StorageError.prototype);
   }
 }
-

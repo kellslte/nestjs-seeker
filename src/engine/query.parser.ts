@@ -35,4 +35,3 @@ export class QueryParser {
     return this.tokenize(this.normalize(text));
   }
 }
-
