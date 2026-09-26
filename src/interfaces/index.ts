@@ -9,6 +9,3 @@ export * from './search.interface';
 
 // Storage interfaces
 export * from './storage.interface';
-
-// Indexer interfaces
-export * from './indexer.interface';

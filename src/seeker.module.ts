@@ -19,49 +19,7 @@ import { DEFAULT_STORAGE_TYPE, DEFAULT_ANALYZER, DEFAULT_FUZZY_THRESHOLD } from 
 @Module({})
 export class SeekerModule {
   static forRoot(options: SeekerModuleOptions): DynamicModule {
-    const storage = SeekerModule.createStorageAdapter(options);
-    const analyzer = options.indexes?.analyzer || DEFAULT_ANALYZER;
-    const fuzzyThreshold = options.search?.fuzzyThreshold || DEFAULT_FUZZY_THRESHOLD;
-
-    return {
-      module: SeekerModule,
-      providers: [
-        {
-          provide: SEEKER_MODULE_OPTIONS,
-          useValue: options,
-        },
-        {
-          provide: 'STORAGE_ADAPTER',
-          useValue: storage,
-        },
-        {
-          provide: IndexManager,
-          useFactory: (adapter: StorageAdapter) => {
-            return new IndexManager(adapter, analyzer);
-          },
-          inject: ['STORAGE_ADAPTER'],
-        },
-        IndexService,
-        {
-          provide: SearchService,
-          useFactory: (indexManager: IndexManager) => {
-            return new SearchService(indexManager, fuzzyThreshold);
-          },
-          inject: [IndexManager],
-        },
-        FacetService,
-        {
-          provide: SuggestionService,
-          useFactory: (indexManager: IndexManager) => {
-            return new SuggestionService(indexManager, fuzzyThreshold);
-          },
-          inject: [IndexManager],
-        },
-        SeekerService,
-      ],
-      exports: [SeekerService],
-      global: true,
-    };
+    return SeekerModule.forRootAsync({ useFactory: () => options });
   }
 
   static forRootAsync(options: {
@@ -88,7 +46,7 @@ export class SeekerModule {
         {
           provide: IndexManager,
           useFactory: (adapter: StorageAdapter, moduleOptions: SeekerModuleOptions) => {
-            const analyzer = moduleOptions.indexes?.analyzer || DEFAULT_ANALYZER;
+            const analyzer = moduleOptions.indexes?.analyzer ?? DEFAULT_ANALYZER;
             return new IndexManager(adapter, analyzer);
           },
           inject: ['STORAGE_ADAPTER', SEEKER_MODULE_OPTIONS],
@@ -97,7 +55,7 @@ export class SeekerModule {
         {
           provide: SearchService,
           useFactory: (indexManager: IndexManager, moduleOptions: SeekerModuleOptions) => {
-            const fuzzyThreshold = moduleOptions.search?.fuzzyThreshold || DEFAULT_FUZZY_THRESHOLD;
+            const fuzzyThreshold = moduleOptions.search?.fuzzyThreshold ?? DEFAULT_FUZZY_THRESHOLD;
             return new SearchService(indexManager, fuzzyThreshold);
           },
           inject: [IndexManager, SEEKER_MODULE_OPTIONS],
@@ -105,7 +63,7 @@ export class SeekerModule {
         {
           provide: SuggestionService,
           useFactory: (indexManager: IndexManager, moduleOptions: SeekerModuleOptions) => {
-            const fuzzyThreshold = moduleOptions.search?.fuzzyThreshold || DEFAULT_FUZZY_THRESHOLD;
+            const fuzzyThreshold = moduleOptions.search?.fuzzyThreshold ?? DEFAULT_FUZZY_THRESHOLD;
             return new SuggestionService(indexManager, fuzzyThreshold);
           },
           inject: [IndexManager, SEEKER_MODULE_OPTIONS],

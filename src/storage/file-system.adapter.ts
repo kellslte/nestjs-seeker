@@ -3,9 +3,8 @@ import * as path from 'path';
 import { BaseStorageAdapter } from './storage.adapter';
 import { StorageOptions } from '../interfaces/storage.interface';
 import { IndexData } from '../types';
-import { CompressionUtil } from './compression.util';
 import { StorageError } from '../errors/seeker.error';
-import { DEFAULT_INDEX_PATH, DEFAULT_COMPRESSION_LEVEL } from '../constants';
+import { DEFAULT_INDEX_PATH } from '../constants';
 
 export class FileSystemAdapter extends BaseStorageAdapter {
   private basePath: string;
@@ -32,14 +31,7 @@ export class FileSystemAdapter extends BaseStorageAdapter {
       const filePath = this.getIndexPath(indexName);
       const data = await fs.readFile(filePath);
 
-      let json: string;
-      if (this.options.compression && CompressionUtil.isCompressed(data)) {
-        json = CompressionUtil.decompress(data, this.options.compressionType);
-      } else {
-        json = data.toString('utf-8');
-      }
-
-      return this.deserialize(json);
+      return this.deserialize(await this.decompressData(data));
     } catch (error: any) {
       if (error.code === 'ENOENT') {
         return null;
@@ -54,18 +46,7 @@ export class FileSystemAdapter extends BaseStorageAdapter {
       const filePath = this.getIndexPath(indexName);
       const json = this.serialize(data);
 
-      let buffer: Buffer;
-      if (this.options.compression) {
-        buffer = CompressionUtil.compress(
-          json,
-          this.options.compressionType,
-          DEFAULT_COMPRESSION_LEVEL,
-        );
-      } else {
-        buffer = Buffer.from(json, 'utf-8');
-      }
-
-      await fs.writeFile(filePath, buffer);
+      await fs.writeFile(filePath, await this.compressData(json));
     } catch (error) {
       throw new StorageError(`Failed to write index: ${indexName}`, error as Error);
     }

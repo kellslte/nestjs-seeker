@@ -1,6 +1,6 @@
 import 'reflect-metadata';
 import {
-  DecoratorIndexer,
+  getFieldConfig,
   getIndexableMetadata,
   getSearchableMetadata,
 } from '../../src/indexers/decorator.indexer';
@@ -21,17 +21,7 @@ class TestEntity {
   normalField: string;
 }
 
-describe('DecoratorIndexer', () => {
-  let indexer: DecoratorIndexer;
-
-  beforeEach(() => {
-    indexer = new DecoratorIndexer();
-  });
-
-  it('should be defined', () => {
-    expect(indexer).toBeDefined();
-  });
-
+describe('decorator metadata', () => {
   it('should get indexable metadata', () => {
     const metadata = getIndexableMetadata(TestEntity);
     expect(metadata).toBeDefined();
@@ -55,7 +45,7 @@ describe('DecoratorIndexer', () => {
     entity.secret = 'Secret';
     entity.normalField = 'Normal';
 
-    const config = indexer.getFieldConfig(entity);
+    const config = getFieldConfig(entity);
     expect(config.name).toBeDefined();
     expect(config.name.weight).toBe(2.0);
     expect(config.category).toBeDefined();

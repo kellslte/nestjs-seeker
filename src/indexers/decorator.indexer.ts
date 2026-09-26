@@ -1,5 +1,4 @@
-import { Indexer } from '../interfaces/indexer.interface';
-import { Document, FieldConfig } from '../types';
+import { FieldConfig } from '../types';
 
 const INDEXABLE_METADATA_KEY = 'seeker:indexable';
 const SEARCHABLE_METADATA_KEY = 'seeker:searchable';
@@ -23,64 +22,34 @@ export function getSearchableMetadata(target: any, propertyKey: string): Searcha
   return Reflect.getMetadata(SEARCHABLE_METADATA_KEY, target, propertyKey) || null;
 }
 
-export class DecoratorIndexer implements Indexer {
-  async index(_indexName: string, _document: Document): Promise<void> {
-    // This is a placeholder - actual indexing is handled by IndexService
-    throw new Error(
-      'DecoratorIndexer.index should not be called directly. Use IndexService instead.',
-    );
-  }
+export function getFieldConfig(entity: any): Record<string, FieldConfig> {
+  const config: Record<string, FieldConfig> = {};
+  const prototype = Object.getPrototypeOf(entity);
+  const constructor = prototype.constructor;
 
-  async indexBatch(_indexName: string, _documents: Document[]): Promise<void> {
-    // This is a placeholder - actual indexing is handled by IndexService
-    throw new Error(
-      'DecoratorIndexer.indexBatch should not be called directly. Use IndexService instead.',
-    );
-  }
+  // Get all property keys from the entity
+  const propertyKeys = [...Object.keys(entity), ...Object.getOwnPropertyNames(prototype)];
 
-  async remove(_indexName: string, _documentId: string): Promise<void> {
-    // This is a placeholder - actual removal is handled by IndexService
-    throw new Error(
-      'DecoratorIndexer.remove should not be called directly. Use IndexService instead.',
-    );
-  }
+  propertyKeys.forEach((key) => {
+    if (key === 'constructor') {
+      return;
+    }
 
-  async update(_indexName: string, _document: Document): Promise<void> {
-    // This is a placeholder - actual update is handled by IndexService
-    throw new Error(
-      'DecoratorIndexer.update should not be called directly. Use IndexService instead.',
-    );
-  }
+    // Try both prototype and constructor
+    let metadata = getSearchableMetadata(prototype, key);
+    if (!metadata) {
+      metadata = getSearchableMetadata(constructor, key);
+    }
 
-  getFieldConfig(entity: any): Record<string, FieldConfig> {
-    const config: Record<string, FieldConfig> = {};
-    const prototype = Object.getPrototypeOf(entity);
-    const constructor = prototype.constructor;
+    if (metadata) {
+      config[key] = {
+        weight: metadata.weight,
+        facet: metadata.facet,
+        searchable: metadata.searchable !== false,
+        analyzer: metadata.analyzer as any,
+      };
+    }
+  });
 
-    // Get all property keys from the entity
-    const propertyKeys = [...Object.keys(entity), ...Object.getOwnPropertyNames(prototype)];
-
-    propertyKeys.forEach((key) => {
-      if (key === 'constructor') {
-        return;
-      }
-
-      // Try both prototype and constructor
-      let metadata = getSearchableMetadata(prototype, key);
-      if (!metadata) {
-        metadata = getSearchableMetadata(constructor, key);
-      }
-
-      if (metadata) {
-        config[key] = {
-          weight: metadata.weight,
-          facet: metadata.facet,
-          searchable: metadata.searchable !== false,
-          analyzer: metadata.analyzer as any,
-        };
-      }
-    });
-
-    return config;
-  }
+  return config;
 }
