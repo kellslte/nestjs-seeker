@@ -4,52 +4,6 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [4.0.0] - 2026-09-26
-
-### Breaking Changes
-- document the 3.0 upgrade path and remove duplicate changelog entry
-- index names containing /, \ or null bytes, or longer than 200 characters, are rejected with INVALID_INDEX_NAME
-- the InvertedIndex type is now term -> document -> field -> { frequency, positions }; 2.x indexes load automatically but should be rebuilt
-- move cloud SDKs to optional peer dependencies and support NestJS 11
-- @aws-sdk/client-s3, @google-cloud/storage, @azure/storage-blob and ioredis are no longer installed automatically; install the one for your storage type
-- replace pako with zlib and remove unused indexer classes
-- the Indexer interface is no longer exported, and ManualIndexer, DecoratorIndexer and BaseService are removed
-
-### Features
-- enhance document handling and persistence
-
-### Bug Fixes
-- remove stale postings and validate index names before caching
-
-### Chores
-- bump version to 3.0.0
-- categorize scoped commits and BREAKING CHANGE footers in changelog
-- update CHANGELOG and add CLAUDE documentation
-
-
-## [4.0.0] - 2026-09-26
-
-### Breaking Changes
-- document the 3.0 upgrade path and remove duplicate changelog entry
-- index names containing /, \ or null bytes, or longer than 200 characters, are rejected with INVALID_INDEX_NAME
-- the InvertedIndex type is now term -> document -> field -> { frequency, positions }; 2.x indexes load automatically but should be rebuilt
-- move cloud SDKs to optional peer dependencies and support NestJS 11
-- @aws-sdk/client-s3, @google-cloud/storage, @azure/storage-blob and ioredis are no longer installed automatically; install the one for your storage type
-- replace pako with zlib and remove unused indexer classes
-- the Indexer interface is no longer exported, and ManualIndexer, DecoratorIndexer and BaseService are removed
-
-### Features
-- enhance document handling and persistence
-
-### Bug Fixes
-- remove stale postings and validate index names before caching
-
-### Chores
-- bump version to 3.0.0
-- categorize scoped commits and BREAKING CHANGE footers in changelog
-- update CHANGELOG and add CLAUDE documentation
-
-
 ## [3.0.0] - 2026-09-26
 
 See "Upgrading from 2.x" in the README.
