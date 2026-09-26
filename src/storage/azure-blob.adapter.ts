@@ -6,10 +6,10 @@ import { StorageError } from '../errors/seeker.error';
 let BlobServiceClient: any;
 
 try {
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
   const azureModule = require('@azure/storage-blob');
   BlobServiceClient = azureModule.BlobServiceClient;
-} catch (error) {
+} catch {
   // Azure SDK not installed
 }
 

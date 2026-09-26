@@ -6,9 +6,9 @@ import { StorageError } from '../errors/seeker.error';
 let Storage: any;
 
 try {
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
   Storage = require('@google-cloud/storage').Storage;
-} catch (error) {
+} catch {
   // GCS SDK not installed
 }
 

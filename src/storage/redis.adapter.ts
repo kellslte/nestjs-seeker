@@ -6,9 +6,11 @@ import { StorageError } from '../errors/seeker.error';
 let Redis: any;
 
 try {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
   Redis = require('ioredis');
-} catch (error) {
+} catch {
   try {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
     Redis = require('redis');
   } catch {
     // Redis not installed

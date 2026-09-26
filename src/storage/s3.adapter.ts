@@ -10,14 +10,14 @@ let DeleteObjectCommand: any;
 let ListObjectsV2Command: any;
 
 try {
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
   const s3Module = require('@aws-sdk/client-s3');
   S3Client = s3Module.S3Client;
   PutObjectCommand = s3Module.PutObjectCommand;
   GetObjectCommand = s3Module.GetObjectCommand;
   DeleteObjectCommand = s3Module.DeleteObjectCommand;
   ListObjectsV2Command = s3Module.ListObjectsV2Command;
-} catch (error) {
+} catch {
   // AWS SDK not installed
 }
 
