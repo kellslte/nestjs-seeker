@@ -11,7 +11,7 @@ NestJS search package: indexing, search and suggestions, with pluggable storage 
 
 ## Commands
 - `npm run build`: run the `tsc` build
-- `npm test` / `npm run test:cov` / `npm run test:e2e`
+- `npm test` / `npm run test:cov` / `npm run typecheck` (Vitest; type-checks tests)
 - `npm run lint`, `npm run format`
 - Release: `npm run release:{patch|minor|major|auto}`. Only when asked.
 
@@ -22,7 +22,7 @@ NestJS search package: indexing, search and suggestions, with pluggable storage 
    - `/ponytail-review` to find over-engineering
    - `/security-review`, always for storage adapters, cloud credentials, file paths, or user-supplied queries
    - `/simplify` if the reviews turn up cleanup work
-3. **Test.** Add or update Jest tests next to the change. `npm run build && npm test && npm run lint` must pass.
+3. **Test.** Add or update Vitest tests in `test/`. `npm run build && npm test && npm run typecheck && npm run lint` must pass.
 4. A feature is done only when all three steps pass. Report any step that was skipped or failed.
 
 ## Other useful skills

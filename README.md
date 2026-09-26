@@ -16,7 +16,7 @@ A comprehensive NestJS search package that provides intelligent local/cloud inde
 npm install @scwar/nestjs-seeker
 ```
 
-Requires NestJS 10 or 11. The package has no runtime dependencies of its own.
+Requires NestJS 10, 11 or 12. NestJS 12 is ESM-only; from a CommonJS app it needs Node 20.19+ or 22.12+, which can `require()` ES modules. The package has no runtime dependencies of its own.
 
 Cloud storage SDKs are optional peer dependencies and are **not installed automatically**. Install the one for the storage type you use:
 
