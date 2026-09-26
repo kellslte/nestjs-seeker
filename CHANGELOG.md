@@ -10,12 +10,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - Add ESLint and Prettier configuration files for code quality enforcement
 
-## [2.0.0] - 2025-12-16
-
-### Chores
-
-- Add ESLint and Prettier configuration files for code quality enforcement
-
 ## [Unreleased]
 
 ### Features

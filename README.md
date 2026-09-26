@@ -16,7 +16,9 @@ A comprehensive NestJS search package that provides intelligent local/cloud inde
 npm install @scwar/nestjs-seeker
 ```
 
-For cloud storage support, install the corresponding optional dependencies:
+Requires NestJS 10 or 11. The package has no runtime dependencies of its own.
+
+Cloud storage SDKs are optional peer dependencies and are **not installed automatically**. Install the one for the storage type you use:
 
 ```bash
 # AWS S3
@@ -138,10 +140,12 @@ storage: {
   options: {
     path: './indexes',
     compression: true,
-    compressionType: 'gzip',
+    compressionType: 'gzip', // or 'brotli'
   },
 }
 ```
+
+Compression uses Node's built-in `zlib`. Stored indexes are read correctly whatever compression setting they were written with.
 
 #### AWS S3 Storage
 ```typescript
@@ -207,7 +211,7 @@ await seeker.index.createIndex({
 // Index a document
 await seeker.index.index('products', document, entity);
 
-// Index multiple documents
+// Index multiple documents (saves to storage once, so prefer it for bulk loads)
 await seeker.index.indexBatch('products', documents, entities);
 
 // Update a document
@@ -225,6 +229,10 @@ const info = await seeker.index.getIndexInfo('products');
 // List all indexes
 const indexes = await seeker.index.listIndexes();
 ```
+
+Index names must be 1–200 characters and may not contain `/`, `\` or null bytes, since they become file paths and storage keys. Other names are rejected with an `INVALID_INDEX_NAME` error.
+
+Without `@Searchable` decorators or a `fieldConfig`, search covers every field in the index's documents.
 
 #### Search Operations
 
@@ -286,6 +294,13 @@ Marks a field as searchable with optional configuration:
 - `facet`: Whether the field should be used for faceted search (default: false)
 - `searchable`: Whether the field is searchable (default: true)
 - `analyzer`: Text analyzer type (default: 'standard')
+
+## Upgrading from 2.x
+
+- **Install your storage SDK yourself.** `@aws-sdk/client-s3`, `@google-cloud/storage`, `@azure/storage-blob` and `ioredis` are no longer installed with the package.
+- **Index names can't contain `/`, `\` or null bytes**, and are limited to 200 characters.
+- **The `InvertedIndex` type changed** from `term → document → { field, … }` to `term → document → field → { frequency, positions }`. Indexes saved by 2.x load automatically, but rebuild them to fix term counts for words that appeared in more than one field.
+- **Removed exports:** the `Indexer` interface. `ManualIndexer`, `DecoratorIndexer` and `BaseService` are also gone if you deep-imported them.
 
 ## License
 
