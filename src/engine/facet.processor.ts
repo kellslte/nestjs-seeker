@@ -33,20 +33,15 @@ export class FacetProcessor {
     const matchingIds: string[] = [];
 
     documents.forEach((doc, docId) => {
-      let matches = true;
-
-      Object.entries(facetFilters).forEach(([field, value]) => {
-        const docValue = doc.fields[field];
-        if (docValue !== value) {
-          matches = false;
-        }
-      });
-
-      if (matches) {
+      if (this.matchesFilters(doc, facetFilters)) {
         matchingIds.push(docId);
       }
     });
 
     return matchingIds;
+  }
+
+  matchesFilters(doc: Document, facetFilters: Record<string, any>): boolean {
+    return Object.entries(facetFilters).every(([field, value]) => doc.fields[field] === value);
   }
 }

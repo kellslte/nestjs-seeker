@@ -74,11 +74,12 @@ export class RelevanceScorer {
     invertedIndex: InvertedIndex,
     documents: Map<string, Document>,
     fieldConfig: Record<string, FieldConfig>,
+    avgFieldLengths: Record<string, number> = {},
   ): number {
     let totalScore = 0;
 
     fields.forEach((field) => {
-      const avgLength = this.calculateAvgFieldLength(documents, field);
+      const avgLength = avgFieldLengths[field] ?? this.calculateAvgFieldLength(documents, field);
 
       queryTerms.forEach((term) => {
         const score = this.calculateBM25(

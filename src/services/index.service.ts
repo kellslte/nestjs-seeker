@@ -37,8 +37,10 @@ export class IndexService {
   async indexBatch(indexName: string, documents: Document[], entities?: any[]): Promise<void> {
     for (let i = 0; i < documents.length; i++) {
       const entity = entities?.[i];
-      await this.index(indexName, documents[i], entity);
+      const fieldConfig = entity ? this.decoratorIndexer.getFieldConfig(entity) : {};
+      await this.indexManager.addDocument(indexName, documents[i], fieldConfig, false);
     }
+    await this.indexManager.persist(indexName);
   }
 
   async remove(indexName: string, documentId: string): Promise<void> {

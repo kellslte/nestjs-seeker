@@ -64,6 +64,7 @@ export class IndexManager {
     indexName: string,
     document: Document,
     fieldConfig: Record<string, FieldConfig>,
+    persist = true,
   ): Promise<void> {
     let indexData = await this.loadIndex(indexName);
     if (!indexData) {
@@ -78,7 +79,8 @@ export class IndexManager {
     document.updatedAt = now;
 
     // Add document
-    indexData.documents.set(document.id, document);
+    // Store a copy: removeDocument re-derives terms from it, so caller mutations must not leak in
+    indexData.documents.set(document.id, { ...document, fields: { ...document.fields } });
 
     // Update inverted index
     Object.entries(document.fields).forEach(([field, value]) => {
@@ -106,7 +108,17 @@ export class IndexManager {
     indexData.metadata.documentCount = indexData.documents.size;
     indexData.metadata.updatedAt = now;
 
-    await this.saveIndex(indexName, indexData);
+    if (persist) {
+      await this.saveIndex(indexName, indexData);
+    }
+  }
+
+  // ponytail: every save still writes the whole index; per-document storage if indexes get large
+  async persist(indexName: string): Promise<void> {
+    const indexData = this.indexes.get(indexName);
+    if (indexData) {
+      await this.storage.write(indexName, indexData);
+    }
   }
 
   async removeDocument(indexName: string, documentId: string): Promise<void> {
@@ -123,12 +135,18 @@ export class IndexManager {
     // Remove from documents
     indexData.documents.delete(documentId);
 
-    // Remove from inverted index
-    Object.keys(indexData.invertedIndex).forEach((term) => {
-      delete indexData.invertedIndex[term][documentId];
-
-      // Clean up empty terms
-      if (Object.keys(indexData.invertedIndex[term]).length === 0) {
+    // Remove from inverted index: only the document's own terms can reference it
+    const parser = new QueryParser(indexData.metadata.analyzer);
+    const terms = new Set(
+      Object.values(document.fields).flatMap((value) => parser.extractTerms(String(value))),
+    );
+    terms.forEach((term) => {
+      const postings = indexData.invertedIndex[term];
+      if (!postings) {
+        return;
+      }
+      delete postings[documentId];
+      if (Object.keys(postings).length === 0) {
         delete indexData.invertedIndex[term];
       }
     });

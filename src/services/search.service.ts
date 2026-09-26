@@ -51,10 +51,30 @@ export class SearchService {
     // Get searchable fields
     const searchFields = query.fields || this.getSearchableFields(indexData);
 
-    // Apply facet filters if provided
-    let candidateIds = Array.from(indexData.documents.keys());
-    if (query.filters) {
-      candidateIds = this.facetProcessor.filterByFacets(indexData.documents, query.filters);
+    // BM25 only scores documents containing a query term; fuzzy has to look at everything
+    let candidateIds = query.fuzzy
+      ? Array.from(indexData.documents.keys())
+      : [
+          ...new Set(
+            queryTerms.flatMap((term) => Object.keys(indexData.invertedIndex[term] ?? {})),
+          ),
+        ];
+    const filters = query.filters;
+    if (filters) {
+      candidateIds = candidateIds.filter((id) => {
+        const doc = indexData.documents.get(id);
+        return doc !== undefined && this.facetProcessor.matchesFilters(doc, filters);
+      });
+    }
+
+    const avgFieldLengths: Record<string, number> = {};
+    if (!query.fuzzy) {
+      searchFields.forEach((field) => {
+        avgFieldLengths[field] = this.relevanceScorer.calculateAvgFieldLength(
+          indexData.documents,
+          field,
+        );
+      });
     }
 
     // Score documents
@@ -89,6 +109,7 @@ export class SearchService {
           indexData.invertedIndex,
           indexData.documents,
           indexData.metadata.fieldConfig,
+          avgFieldLengths,
         );
       }
 
