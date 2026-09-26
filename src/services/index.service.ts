@@ -1,20 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { IndexManager } from '../index-manager';
-import { Document, FieldConfig } from '../types';
+import { Document } from '../types';
 import { IndexOptions, IndexInfo } from '../interfaces/index.interface';
 import { IndexNotFoundError } from '../errors/seeker.error';
-import { DecoratorIndexer } from '../indexers/decorator.indexer';
-import { ManualIndexer } from '../indexers/manual.indexer';
+import { getFieldConfig } from '../indexers/decorator.indexer';
 
 @Injectable()
 export class IndexService {
-  private decoratorIndexer: DecoratorIndexer;
-  private manualIndexer: ManualIndexer;
-
-  constructor(private readonly indexManager: IndexManager) {
-    this.decoratorIndexer = new DecoratorIndexer();
-    this.manualIndexer = new ManualIndexer();
-  }
+  constructor(private readonly indexManager: IndexManager) {}
 
   async createIndex(options: IndexOptions): Promise<void> {
     await this.indexManager.createIndex(options.name, options.fieldConfig || {}, options.analyzer);
@@ -25,22 +18,21 @@ export class IndexService {
   }
 
   async index(indexName: string, document: Document, entity?: any): Promise<void> {
-    let fieldConfig: Record<string, FieldConfig> = {};
-
-    if (entity) {
-      fieldConfig = this.decoratorIndexer.getFieldConfig(entity);
-    }
-
+    const fieldConfig = entity ? getFieldConfig(entity) : {};
     await this.indexManager.addDocument(indexName, document, fieldConfig);
   }
 
   async indexBatch(indexName: string, documents: Document[], entities?: any[]): Promise<void> {
-    for (let i = 0; i < documents.length; i++) {
-      const entity = entities?.[i];
-      const fieldConfig = entity ? this.decoratorIndexer.getFieldConfig(entity) : {};
-      await this.indexManager.addDocument(indexName, documents[i], fieldConfig, false);
+    try {
+      for (let i = 0; i < documents.length; i++) {
+        const entity = entities?.[i];
+        const fieldConfig = entity ? getFieldConfig(entity) : {};
+        await this.indexManager.addDocument(indexName, documents[i], fieldConfig, false);
+      }
+    } finally {
+      // Persist whatever made it into the cache, even if a document failed
+      await this.indexManager.persist(indexName);
     }
-    await this.indexManager.persist(indexName);
   }
 
   async remove(indexName: string, documentId: string): Promise<void> {
@@ -48,12 +40,7 @@ export class IndexService {
   }
 
   async update(indexName: string, document: Document, entity?: any): Promise<void> {
-    let fieldConfig: Record<string, FieldConfig> = {};
-
-    if (entity) {
-      fieldConfig = this.decoratorIndexer.getFieldConfig(entity);
-    }
-
+    const fieldConfig = entity ? getFieldConfig(entity) : {};
     await this.indexManager.updateDocument(indexName, document, fieldConfig);
   }
 
@@ -72,6 +59,6 @@ export class IndexService {
   }
 
   async listIndexes(): Promise<string[]> {
-    return await this.indexManager['storage'].list();
+    return this.indexManager.listIndexes();
   }
 }

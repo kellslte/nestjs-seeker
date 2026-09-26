@@ -3,6 +3,7 @@ import { StorageAdapter } from './interfaces/storage.interface';
 import { IndexData, IndexMetadata, Document, FieldConfig, AnalyzerType } from './types';
 import { QueryParser } from './engine/query.parser';
 import { DEFAULT_ANALYZER } from './constants';
+import { validateIndexName } from './storage/storage.adapter';
 
 @Injectable()
 export class IndexManager {
@@ -16,6 +17,7 @@ export class IndexManager {
   }
 
   async loadIndex(indexName: string): Promise<IndexData | null> {
+    validateIndexName(indexName);
     if (this.indexes.has(indexName)) {
       return this.indexes.get(indexName)!;
     }
@@ -27,7 +29,9 @@ export class IndexManager {
     return data;
   }
 
+  // ponytail: every save writes the whole index; per-document storage if indexes get large
   async saveIndex(indexName: string, data: IndexData): Promise<void> {
+    validateIndexName(indexName);
     this.indexes.set(indexName, data);
     await this.storage.write(indexName, data);
   }
@@ -39,7 +43,7 @@ export class IndexManager {
   async createIndex(
     indexName: string,
     fieldConfig: Record<string, FieldConfig> = {},
-    analyzer: AnalyzerType = DEFAULT_ANALYZER,
+    analyzer: AnalyzerType = this.analyzer,
   ): Promise<IndexData> {
     const metadata: IndexMetadata = {
       name: indexName,
@@ -68,7 +72,7 @@ export class IndexManager {
   ): Promise<void> {
     let indexData = await this.loadIndex(indexName);
     if (!indexData) {
-      indexData = await this.createIndex(indexName, fieldConfig);
+      indexData = await this.createIndex(indexName);
     }
 
     const parser = new QueryParser(indexData.metadata.analyzer);
@@ -78,8 +82,15 @@ export class IndexManager {
     document.createdAt = document.createdAt || now;
     document.updatedAt = now;
 
-    // Add document
-    // Store a copy: removeDocument re-derives terms from it, so caller mutations must not leak in
+    // Re-indexing an existing id replaces it, so drop its old postings first
+    if (indexData.documents.has(document.id)) {
+      this.removePostings(indexData, document.id);
+    }
+
+    // Remember per-call config (e.g. @Searchable({ searchable: false })) for default search fields
+    Object.assign(indexData.metadata.fieldConfig, fieldConfig);
+
+    // Store a copy so later caller mutations don't change the indexed document
     indexData.documents.set(document.id, { ...document, fields: { ...document.fields } });
 
     // Update inverted index
@@ -113,11 +124,23 @@ export class IndexManager {
     }
   }
 
-  // ponytail: every save still writes the whole index; per-document storage if indexes get large
   async persist(indexName: string): Promise<void> {
     const indexData = this.indexes.get(indexName);
     if (indexData) {
-      await this.storage.write(indexName, indexData);
+      await this.saveIndex(indexName, indexData);
+    }
+  }
+
+  // Full sweep: a document's stored fields can't reliably reproduce its terms (Dates reload as strings)
+  private removePostings(indexData: IndexData, documentId: string): void {
+    for (const term of Object.keys(indexData.invertedIndex)) {
+      const postings = indexData.invertedIndex[term];
+      if (postings[documentId]) {
+        delete postings[documentId];
+        if (Object.keys(postings).length === 0) {
+          delete indexData.invertedIndex[term];
+        }
+      }
     }
   }
 
@@ -127,29 +150,10 @@ export class IndexManager {
       return;
     }
 
-    const document = indexData.documents.get(documentId);
-    if (!document) {
+    if (!indexData.documents.delete(documentId)) {
       return;
     }
-
-    // Remove from documents
-    indexData.documents.delete(documentId);
-
-    // Remove from inverted index: only the document's own terms can reference it
-    const parser = new QueryParser(indexData.metadata.analyzer);
-    const terms = new Set(
-      Object.values(document.fields).flatMap((value) => parser.extractTerms(String(value))),
-    );
-    terms.forEach((term) => {
-      const postings = indexData.invertedIndex[term];
-      if (!postings) {
-        return;
-      }
-      delete postings[documentId];
-      if (Object.keys(postings).length === 0) {
-        delete indexData.invertedIndex[term];
-      }
-    });
+    this.removePostings(indexData, documentId);
 
     // Update metadata
     indexData.metadata.documentCount = indexData.documents.size;
@@ -167,7 +171,12 @@ export class IndexManager {
     await this.addDocument(indexName, document, fieldConfig);
   }
 
+  listIndexes(): Promise<string[]> {
+    return this.storage.list();
+  }
+
   async deleteIndex(indexName: string): Promise<void> {
+    validateIndexName(indexName);
     this.indexes.delete(indexName);
     await this.storage.delete(indexName);
   }

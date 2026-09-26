@@ -42,7 +42,7 @@ describe('search', () => {
     expect(res.total).toBe(1);
   });
 
-  it('reads indexes stored in the pre-2.1 format', async () => {
+  it('reads indexes stored in the pre-3.0 format', async () => {
     const adapter = new InMemoryAdapter();
     const legacy = JSON.stringify({
       documents: [['1', { id: '1', fields: { title: 'red' } }]],
