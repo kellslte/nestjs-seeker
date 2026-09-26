@@ -41,7 +41,7 @@ export class RedisAdapter extends CloudAdapter {
   }
 
   private getRedisKey(indexName: string): string {
-    return `${this.keyPrefix}${indexName}`;
+    return `${this.keyPrefix}${this.validateIndexName(indexName)}`;
   }
 
   async read(indexName: string): Promise<IndexData | null> {

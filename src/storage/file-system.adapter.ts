@@ -16,7 +16,7 @@ export class FileSystemAdapter extends BaseStorageAdapter {
   }
 
   private getIndexPath(indexName: string): string {
-    return path.join(this.basePath, `${indexName}.seeker`);
+    return path.join(this.basePath, `${this.validateIndexName(indexName)}.seeker`);
   }
 
   private async ensureDirectory(): Promise<void> {

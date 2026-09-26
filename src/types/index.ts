@@ -28,9 +28,10 @@ export interface FieldConfig {
 export interface InvertedIndex {
   [term: string]: {
     [documentId: string]: {
-      field: string;
-      frequency: number;
-      positions: number[];
+      [field: string]: {
+        frequency: number;
+        positions: number[];
+      };
     };
   };
 }

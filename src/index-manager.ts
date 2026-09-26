@@ -52,7 +52,7 @@ export class IndexManager {
 
     const indexData: IndexData = {
       documents: new Map(),
-      invertedIndex: {},
+      invertedIndex: Object.create(null),
       metadata,
     };
 
@@ -92,19 +92,13 @@ export class IndexManager {
 
       terms.forEach((term, position) => {
         if (!indexData.invertedIndex[term]) {
-          indexData.invertedIndex[term] = {};
+          indexData.invertedIndex[term] = Object.create(null);
         }
 
-        if (!indexData.invertedIndex[term][document.id]) {
-          indexData.invertedIndex[term][document.id] = {
-            field,
-            frequency: 0,
-            positions: [],
-          };
-        }
-
-        indexData.invertedIndex[term][document.id].frequency++;
-        indexData.invertedIndex[term][document.id].positions.push(position);
+        const postings = (indexData.invertedIndex[term][document.id] ??= Object.create(null));
+        const entry = (postings[field] ??= { frequency: 0, positions: [] });
+        entry.frequency++;
+        entry.positions.push(position);
       });
     });
 

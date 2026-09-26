@@ -6,6 +6,7 @@ import { QueryParser } from '../engine/query.parser';
 import { RelevanceScorer } from '../engine/relevance.scorer';
 import { FuzzyMatcher } from '../engine/fuzzy.matcher';
 import { FacetProcessor } from '../engine/facet.processor';
+import { IndexData } from '../types';
 import { DEFAULT_FUZZY_THRESHOLD, DEFAULT_MAX_RESULTS, DEFAULT_MIN_SCORE } from '../constants';
 
 @Injectable()
@@ -136,10 +137,17 @@ export class SearchService {
     };
   }
 
-  private getSearchableFields(indexData: any): string[] {
-    return Object.keys(indexData.metadata.fieldConfig).filter(
-      (field) => indexData.metadata.fieldConfig[field].searchable !== false,
-    );
+  private getSearchableFields(indexData: IndexData): string[] {
+    const config = indexData.metadata.fieldConfig;
+    const configured = Object.keys(config).filter((field) => config[field].searchable !== false);
+    if (configured.length > 0) {
+      return configured;
+    }
+
+    // No searchable fields configured (manual indexing): search every field seen in the index
+    const fields = new Set<string>();
+    indexData.documents.forEach((doc) => Object.keys(doc.fields).forEach((f) => fields.add(f)));
+    return [...fields].filter((field) => config[field]?.searchable !== false);
   }
 
   private generateHighlights(

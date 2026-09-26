@@ -30,6 +30,6 @@ export abstract class CloudAdapter extends BaseStorageAdapter {
   }
 
   protected getKey(indexName: string): string {
-    return `indexes/${indexName}.seeker`;
+    return `indexes/${this.validateIndexName(indexName)}.seeker`;
   }
 }

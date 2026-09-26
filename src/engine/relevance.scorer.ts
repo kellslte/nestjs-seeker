@@ -13,8 +13,8 @@ export class RelevanceScorer {
     fieldConfig: Record<string, FieldConfig>,
     avgFieldLength: number,
   ): number {
-    const termData = invertedIndex[term]?.[documentId];
-    if (!termData || termData.field !== field) {
+    const termData = invertedIndex[term]?.[documentId]?.[field];
+    if (!termData) {
       return 0;
     }
 
