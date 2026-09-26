@@ -7,7 +7,7 @@ const doc = (id: string, fields: Record<string, any>) => ({ id, fields }) as any
 describe('IndexManager', () => {
   it('indexBatch writes to storage once and persists every document', async () => {
     const adapter = new InMemoryAdapter();
-    const write = jest.spyOn(adapter, 'write');
+    const write = vi.spyOn(adapter, 'write');
     const manager = new IndexManager(adapter);
 
     await new IndexService(manager).indexBatch('idx', [doc('1', { t: 'a' }), doc('2', { t: 'b' })]);

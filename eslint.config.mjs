@@ -9,7 +9,7 @@ export default tseslint.config(
   tseslint.configs.recommended,
   prettierRecommended,
   {
-    languageOptions: { globals: { ...globals.node, ...globals.jest } },
+    languageOptions: { globals: globals.node },
     rules: {
       '@typescript-eslint/explicit-function-return-type': 'off',
       '@typescript-eslint/explicit-module-boundary-types': 'off',
