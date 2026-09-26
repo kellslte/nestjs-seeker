@@ -20,13 +20,13 @@ class ChangelogUpdater {
     getCommitsSinceLastTag() {
         try {
             const lastTag = execSync('git describe --tags --abbrev=0', { encoding: 'utf8' }).trim();
-            const commits = execSync(`git log ${lastTag}..HEAD --oneline --format="%s"`, { encoding: 'utf8' });
-            return commits.split('\n').filter(Boolean);
+            const commits = execSync(`git log ${lastTag}..HEAD --format="%s%n%b%x00"`, { encoding: 'utf8' });
+            return commits.split('\0').map((c) => c.trim()).filter(Boolean);
         } catch (error) {
             // If no tags exist, get recent commits
             try {
-                const commits = execSync('git log -10 --oneline --format="%s"', { encoding: 'utf8' });
-                return commits.split('\n').filter(Boolean);
+                const commits = execSync('git log -10 --format="%s%n%b%x00"', { encoding: 'utf8' });
+                return commits.split('\0').map((c) => c.trim()).filter(Boolean);
             } catch (err) {
                 console.warn('Warning: Could not get git commits');
                 return [];
@@ -49,23 +49,28 @@ class ChangelogUpdater {
             'Refactor': []
         };
 
+        const types = {
+            feat: 'Features', fix: 'Bug Fixes', perf: 'Performance', refactor: 'Refactor',
+            docs: 'Documentation', test: 'Tests', chore: 'Chores', ci: 'Chores', build: 'Chores'
+        };
+
         for (const commit of commits) {
-            if (commit.includes('!:')) {
-                categories['Breaking Changes'].push(commit.replace(/^.*?: /, ''));
-            } else if (commit.startsWith('feat:')) {
-                categories['Features'].push(commit.replace(/^feat: /, ''));
-            } else if (commit.startsWith('fix:')) {
-                categories['Bug Fixes'].push(commit.replace(/^fix: /, ''));
-            } else if (commit.startsWith('perf:')) {
-                categories['Performance'].push(commit.replace(/^perf: /, ''));
-            } else if (commit.startsWith('refactor:')) {
-                categories['Refactor'].push(commit.replace(/^refactor: /, ''));
-            } else if (commit.startsWith('docs:')) {
-                categories['Documentation'].push(commit.replace(/^docs: /, ''));
-            } else if (commit.startsWith('test:')) {
-                categories['Tests'].push(commit.replace(/^test: /, ''));
-            } else if (commit.startsWith('chore:') || commit.startsWith('ci:') || commit.startsWith('build:')) {
-                categories['Chores'].push(commit.replace(/^(chore|ci|build): /, ''));
+            const [subject, ...body] = commit.split('\n');
+            // type(scope)!: description
+            const match = subject.match(/^(\w+)(?:\([^)]*\))?(!)?: (.+)$/);
+            if (match) {
+                const [, type, bang, description] = match;
+                if (bang) {
+                    categories['Breaking Changes'].push(description);
+                } else if (types[type]) {
+                    categories[types[type]].push(description);
+                }
+            }
+            for (const line of body) {
+                const breaking = line.match(/^BREAKING[ -]CHANGE: (.+)$/);
+                if (breaking) {
+                    categories['Breaking Changes'].push(breaking[1]);
+                }
             }
         }
 
