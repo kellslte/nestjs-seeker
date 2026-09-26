@@ -36,6 +36,10 @@ jobs:
           cache: 'npm'
           registry-url: 'https://registry.npmjs.org'
 
+      # Trusted publishing (OIDC) needs npm >= 11.5.1; Node 22 ships npm 10
+      - name: Update npm
+        run: npm install -g npm@latest
+
       - name: Install dependencies
         run: npm ci
 
@@ -53,16 +57,22 @@ jobs:
             npm run version:$VERSION_TYPE
             VERSION=$(node -p "require('./package.json').version")
           else
-            # Extract version from tag
+            # Extract version from tag; it must match package.json
             VERSION=${GITHUB_REF#refs/tags/v}
+            PKG_VERSION=$(node -p "require('./package.json').version")
+            if [ "$VERSION" != "$PKG_VERSION" ]; then
+              echo "::error::Tag v$VERSION does not match package.json version $PKG_VERSION"
+              exit 1
+            fi
           fi
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "Version: $VERSION"
 
-      - name: Update changelog
-        run: npm run changelog:update
+      # Authenticates with GitHub OIDC (trusted publishing); no token needed
+      - name: Publish to npm
+        run: npm publish --access public
 
-      - name: Commit changes
+      - name: Push version commit and tag
         if: github.event_name == 'workflow_dispatch'
         run: |
           git config user.name "github-actions[bot]"
@@ -73,13 +83,8 @@ jobs:
           git push origin HEAD:main
           git push origin "v${{ steps.version.outputs.version }}"
 
-      - name: Publish to npm
-        run: npm publish --access public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-
       - name: Create GitHub Release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           tag_name: v${{ steps.version.outputs.version }}
           name: Release v${{ steps.version.outputs.version }}
