@@ -10,15 +10,18 @@ export class IndexManager {
   private indexes: Map<string, IndexData> = new Map();
   private storage: StorageAdapter;
   private analyzer: AnalyzerType;
+  private shared: boolean;
 
-  constructor(storage: StorageAdapter, analyzer: AnalyzerType = DEFAULT_ANALYZER) {
+  // shared: other processes write the same storage, so always re-read instead of trusting the cache
+  constructor(storage: StorageAdapter, analyzer: AnalyzerType = DEFAULT_ANALYZER, shared = false) {
     this.storage = storage;
     this.analyzer = analyzer;
+    this.shared = shared;
   }
 
   async loadIndex(indexName: string): Promise<IndexData | null> {
     validateIndexName(indexName);
-    if (this.indexes.has(indexName)) {
+    if (!this.shared && this.indexes.has(indexName)) {
       return this.indexes.get(indexName)!;
     }
 
@@ -70,7 +73,9 @@ export class IndexManager {
     fieldConfig: Record<string, FieldConfig>,
     persist = true,
   ): Promise<void> {
-    let indexData = await this.loadIndex(indexName);
+    // Batches (persist = false) keep building on the copy loaded at the start of the batch
+    // ponytail: shared mode is last-writer-wins between concurrent writers; add storage locking if two processes write at once
+    let indexData = (!persist && this.indexes.get(indexName)) || (await this.loadIndex(indexName));
     if (!indexData) {
       indexData = await this.createIndex(indexName);
     }

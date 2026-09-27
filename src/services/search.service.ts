@@ -51,14 +51,14 @@ export class SearchService {
     // Get searchable fields
     const searchFields = query.fields || this.getSearchableFields(indexData);
 
-    // BM25 only scores documents containing a query term; fuzzy has to look at everything
-    let candidateIds = query.fuzzy
-      ? Array.from(indexData.documents.keys())
-      : [
-          ...new Set(
-            queryTerms.flatMap((term) => Object.keys(indexData.invertedIndex[term] ?? {})),
-          ),
-        ];
+    // Fuzzy compares query words to the index's words (not raw field text), then scores via postings
+    const fuzzyTerms = query.fuzzy ? this.matchVocabulary(queryTerms, indexData) : undefined;
+    const lookupTerms = fuzzyTerms
+      ? fuzzyTerms.flatMap((matches) => [...matches.keys()])
+      : queryTerms;
+    let candidateIds = [
+      ...new Set(lookupTerms.flatMap((term) => Object.keys(indexData.invertedIndex[term] ?? {}))),
+    ];
     const filters = query.filters;
     if (filters) {
       candidateIds = candidateIds.filter((id) => {
@@ -83,23 +83,19 @@ export class SearchService {
     candidateIds.forEach((documentId) => {
       let score = 0;
 
-      if (query.fuzzy) {
-        // Use fuzzy matching
-        const document = indexData.documents.get(documentId);
-        if (document) {
-          searchFields.forEach((field) => {
-            const fieldValue = String(document.fields[field] || '');
-            queryTerms.forEach((term) => {
-              const similarity = this.fuzzyMatcher.calculateSimilarity(
-                term,
-                fieldValue.toLowerCase(),
-              );
-              if (similarity > 0.5) {
-                score += similarity * (indexData.metadata.fieldConfig[field]?.weight || 1.0);
+      if (fuzzyTerms) {
+        // Each query word scores its best-matching index word per field
+        searchFields.forEach((field) => {
+          fuzzyTerms.forEach((matches) => {
+            let best = 0;
+            matches.forEach((similarity, term) => {
+              if (indexData.invertedIndex[term][documentId]?.[field] && similarity > best) {
+                best = similarity;
               }
             });
+            score += best * (indexData.metadata.fieldConfig[field]?.weight || 1.0);
           });
-        }
+        });
       } else {
         // Use BM25 scoring
         score = this.relevanceScorer.scoreDocument(
@@ -136,7 +132,7 @@ export class SearchService {
       return {
         document,
         score: item.score,
-        highlights: this.generateHighlights(document, queryTerms, searchFields),
+        highlights: this.generateHighlights(document, lookupTerms, searchFields),
       };
     });
 
@@ -156,6 +152,22 @@ export class SearchService {
       query: query.query,
       took: Date.now() - startTime,
     };
+  }
+
+  // ponytail: scans the whole vocabulary per query word; a BK-tree or n-gram index if vocabularies get huge
+  private matchVocabulary(queryTerms: string[], indexData: IndexData): Map<string, number>[] {
+    const vocabulary = Object.keys(indexData.invertedIndex);
+    return queryTerms.map((queryTerm) => {
+      const matches = new Map<string, number>();
+      for (const term of vocabulary) {
+        // Length gap is a lower bound on edit distance: skip what can't reach the cutoff
+        if (Math.abs(term.length - queryTerm.length) > this.fuzzyThreshold) continue;
+        if (this.fuzzyMatcher.isMatch(term, queryTerm)) {
+          matches.set(term, this.fuzzyMatcher.calculateSimilarity(term, queryTerm));
+        }
+      }
+      return matches;
+    });
   }
 
   private getSearchableFields(indexData: IndexData): string[] {

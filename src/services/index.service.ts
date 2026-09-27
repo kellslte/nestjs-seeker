@@ -23,6 +23,8 @@ export class IndexService {
   }
 
   async indexBatch(indexName: string, documents: Document[], entities?: any[]): Promise<void> {
+    // Start from the latest stored copy; each addDocument then reuses it
+    await this.indexManager.loadIndex(indexName);
     try {
       for (let i = 0; i < documents.length; i++) {
         const entity = entities?.[i];
@@ -45,7 +47,7 @@ export class IndexService {
   }
 
   async getIndexInfo(indexName: string): Promise<IndexInfo> {
-    const indexData = this.indexManager.getIndex(indexName);
+    const indexData = await this.indexManager.loadIndex(indexName);
     if (!indexData) {
       throw new IndexNotFoundError(indexName);
     }

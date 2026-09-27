@@ -15,7 +15,7 @@ export class QueryParser {
   normalize(text: string): string {
     return text
       .toLowerCase()
-      .replace(/[^\w\s]/g, ' ')
+      .replace(/[^\p{L}\p{N}_\s]/gu, ' ')
       .replace(/\s+/g, ' ')
       .trim();
   }
@@ -24,7 +24,7 @@ export class QueryParser {
     if (this.analyzer === 'whitespace') {
       return text.split(/\s+/).filter((token) => token.length > 0);
     } else if (this.analyzer === 'simple') {
-      return text.split(/\W+/).filter((token) => token.length > 0);
+      return text.split(/[^\p{L}\p{N}_]+/u).filter((token) => token.length > 0);
     } else {
       // standard analyzer
       return text.split(/\s+/).filter((token) => token.length > 0);

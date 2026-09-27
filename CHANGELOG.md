@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Features
+- `storage.shared: true` re-reads indexes from storage on every access, for multiple processes on shared Redis/S3/etc. Concurrent writers are still last-writer-wins.
+
+### Bug Fixes
+- `fuzzy: true` now matches query words against indexed words, so exact and near-miss words match, and no longer scans raw field text of every document
+- the standard and simple analyzers keep accented and non-Latin letters (é, ñ, 日本語). Re-index existing data to make such text searchable.
+- `getIndexInfo` loads the index from storage instead of failing when it isn't cached yet
+
 ## [3.1.0] - 2026-09-26
 
 ### Features

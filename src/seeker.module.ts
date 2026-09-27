@@ -47,7 +47,7 @@ export class SeekerModule {
           provide: IndexManager,
           useFactory: (adapter: StorageAdapter, moduleOptions: SeekerModuleOptions) => {
             const analyzer = moduleOptions.indexes?.analyzer ?? DEFAULT_ANALYZER;
-            return new IndexManager(adapter, analyzer);
+            return new IndexManager(adapter, analyzer, moduleOptions.storage?.shared ?? false);
           },
           inject: ['STORAGE_ADAPTER', SEEKER_MODULE_OPTIONS],
         },
